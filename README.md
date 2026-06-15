@@ -1,4 +1,4 @@
-# OXYNAV: Acute Hypoxia, Spatial Navigation, and Intrinsic Brain Activity
+# ALLOCENTRIC BUT NOT EGOCENTIC NAVIGATION IS DISRUPTED BY ACUTE HYPOXIA
 
 ## Overview
 
