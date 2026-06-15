@@ -22,11 +22,7 @@ OXYNAV/
 │
 ├── notebooks/
 │   ├── eeg_processing.ipynb
-│   ├── hypothesis1_navigation.ipynb
-│   ├── hypothesis2_eeg.ipynb
-│   └── hypothesis3_spo2.ipynb
-│
-├── results/
+│   ├── oxynav_models.ipynb
 │
 ├── requirements.txt
 │
