@@ -1,4 +1,4 @@
-# ALLOCENTRIC BUT NOT EGOCENTIC NAVIGATION IS DISRUPTED BY ACUTE HYPOXIA
+# Acute Hypoxia Disrupts Multiple Processes Supporting Spatial Navigation
 
 ## Overview
 
@@ -16,22 +16,21 @@ This repository contains the data and analysis code used to investigate how acut
 OXYNAV/
 │
 ├── data/
-│   ├── MASTER_CHANGE_WITH_SPO2.csv
+│   ├── behavioural_eeg_data.csv
 │   ├── SpO2_continuous.csv
 │   └── SpO2_intermittent.csv
 │
 ├── notebooks/
-│   ├── eeg_processing.ipynb
-│   ├── oxynav_models.ipynb
+│   ├── ART ANOVA.Rmd
+│   
 │
-├── requirements.txt
 │
 └── README.md
 ```
 
 ## Data Files
 
-### MASTER_CHANGE_WITH_SPO2.csv
+### behavioural_eeg_data.csv
 
 Primary analysis dataset containing:
 
@@ -61,11 +60,6 @@ Outcomes:
 - Egocentric Pointing
 - Mapping
 - Perspective-Taking
-
-Models:
-
-- Linear Mixed Models (REML)
-- Generalised Estimating Equations (GEE)
 
 ### Hypothesis 2
 
@@ -103,16 +97,7 @@ Spectral parameterisation was performed using Specparam (formerly FOOOF).
 
 ## Reproducibility
 
-All analyses were conducted in Python.
-
-Model diagnostics included:
-
-- Residual histograms
-- Q-Q plots
-- Residual vs fitted plots
-- Shapiro-Wilk tests
-
-Outliers were removed using a ±3 SD criterion before model fitting.
+All analyses were conducted in R and available in ART ANOVA.Rmd
 
 ## Data Availability
 
