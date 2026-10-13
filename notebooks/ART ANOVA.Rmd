@@ -1,0 +1,2544 @@
+---
+title: "ART ANOVA: Acute Hypoxia Disrupts Multiple Processes Supporting Spatial Navigation"
+output:
+  html_document:
+    df_print: paged
+date: "2026-10-13"
+---
+
+```{r echo=FALSE}
+dat <- read.csv("../data/behavioural_eeg_data.csv")
+
+phys_cont <- read.csv("../data/SpO2_continuous.csv")
+
+phys_int <- read.csv("../data/SpO2_intermittent.csv")
+```
+
+CONTINUOUS SPO2
+```{r echo=FALSE}
+library(ARTool)
+phys_cont$Session <- factor(
+  phys_cont$Session,
+  levels = c("0", "1")
+)
+
+phys_cont$Timepoint <- factor(
+  phys_cont$Timepoint,
+  levels = c("1", "2", "3", "4")
+)
+
+phys_cont$ID <- factor(
+  phys_cont$ID
+)
+
+dat_clean <- phys_cont[!is.na(phys_cont$SpO2), ]
+
+m <- art(
+  SpO2 ~ Session *Timepoint + (1|ID),
+  data = dat_clean
+)
+
+anova(m)
+
+art.con(
+  m, ~ Session
+)
+
+art.con(
+  m, ~ Timepoint
+)
+
+art.con(
+  m, ~ Session*Timepoint
+)
+
+#FIGURE#
+
+library(ggplot2)
+library(ggbeeswarm)
+library(dplyr)
+library(ggnewscale)
+
+## Colours
+cols_raw <- c(
+  "Sham"    = "#9EC5FE",
+  "Hypoxia" = "#F6A3B4"
+)
+
+cols_mean <- c(
+  "Sham"    = "#2D7FF9",
+  "Hypoxia" = "#D7264C"
+)
+
+## Factors
+dat_clean$Session <- factor(
+  dat_clean$Session,
+  levels = c("0","1"),
+  labels = c("Sham","Hypoxia")
+)
+
+dat_clean$Timepoint <- factor(
+  dat_clean$Timepoint,
+  levels = c("1","2", "3", "4"),
+  labels = c("Pre","0 min", "30 min", "60 min")
+)
+
+## Summary statistics
+summary_df <-
+  dat_clean %>%
+  group_by(Timepoint, Session) %>%
+  summarise(
+    Mean  = mean(SpO2, na.rm = TRUE),
+    SE    = sd(SpO2, na.rm = TRUE) /
+              sqrt(sum(!is.na(SpO2))),
+    Lower = Mean - 1.96 * SE,
+    Upper = Mean + 1.96 * SE,
+    .groups = "drop"
+  )
+
+p <- ggplot(dat_clean,
+       aes(x = Timepoint,
+           y = SpO2)) +
+
+  ## Participant trajectories
+  geom_line(
+    aes(group = interaction(ID, Session)),
+    colour = "grey75",
+    alpha = .10,
+    linewidth = .45
+  ) +
+
+  ## Raw observations
+  geom_quasirandom(
+    aes(colour = Session),
+    width = .10,
+    size = 2.6,
+    alpha = .55
+  ) +
+
+  scale_colour_manual(values = cols_raw) +
+
+  ## Reset colour scale
+  new_scale_colour() +
+
+  ## Error bars (dark colours)
+  geom_errorbar(
+    data = summary_df,
+    aes(
+      x = Timepoint,
+      y = Mean,
+      ymin = Lower,
+      ymax = Upper,
+      colour = Session
+    ),
+    width = .1,
+    linewidth = 1.0,
+    inherit.aes = FALSE
+  ) +
+
+  scale_colour_manual(values = cols_mean) +
+
+  ## Means
+  geom_point(
+    data = summary_df,
+    aes(
+      x = Timepoint,
+      y = Mean,
+      fill = Session
+    ),
+    shape = 21,
+    size = 5,
+    colour = "grey15",
+    stroke = 0.1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_fill_manual(values = cols_mean) +
+
+  labs(
+    x = expression(atop("Time (min)")),
+    y = expression(atop("SpO2 (%)"))
+  ) +
+
+  theme_classic(base_size = 15) +
+
+  theme(
+
+    legend.position = "none",
+
+    axis.title.y =
+      element_text(
+        face = "bold",
+        size = 18
+      ),
+
+    axis.text =
+      element_text(
+        colour = "black",
+        size = 16
+      ),
+
+    strip.background =
+      element_rect(
+        fill = "grey95",
+        colour = NA
+      ),
+
+    strip.text =
+      element_text(
+        face = "bold",
+        size = 18
+      ),
+
+    panel.spacing =
+      unit(1.3, "cm")
+  )
+```
+CONTINUOUS HR
+```{r echo=FALSE}
+library(ARTool)
+phys_cont$Session <- factor(
+  phys_cont$Session,
+  levels = c("0", "1")
+)
+
+phys_cont$Timepoint <- factor(
+  phys_cont$Timepoint,
+  levels = c("1", "2", "3", "4")
+)
+
+phys_cont$ID <- factor(
+  phys_cont$ID
+)
+
+dat_clean <- phys_cont[!is.na(phys_cont$HR), ]
+
+m <- art(
+  HR ~ Session *Timepoint + (1|ID),
+  data = dat_clean
+)
+
+anova(m)
+
+art.con(
+  m, ~ Session
+)
+
+art.con(
+  m, ~ Timepoint
+)
+
+#FIGURE#
+
+library(ggplot2)
+library(ggbeeswarm)
+library(dplyr)
+library(ggnewscale)
+
+## Colours
+cols_raw <- c(
+  "Sham"    = "#9EC5FE",
+  "Hypoxia" = "#F6A3B4"
+)
+
+cols_mean <- c(
+  "Sham"    = "#2D7FF9",
+  "Hypoxia" = "#D7264C"
+)
+
+## Factors
+dat_clean$Session <- factor(
+  dat_clean$Session,
+  levels = c("0","1"),
+  labels = c("Sham","Hypoxia")
+)
+
+dat_clean$Timepoint <- factor(
+  dat_clean$Timepoint,
+  levels = c("1","2", "3", "4"),
+  labels = c("Pre","0 min", "30 min", "60 min")
+)
+
+## Summary statistics
+summary_df <-
+  dat_clean %>%
+  group_by(Timepoint, Session) %>%
+  summarise(
+    Mean  = mean(HR, na.rm = TRUE),
+    SE    = sd(HR, na.rm = TRUE) /
+              sqrt(sum(!is.na(HR))),
+    Lower = Mean - 1.96 * SE,
+    Upper = Mean + 1.96 * SE,
+    .groups = "drop"
+  )
+
+p <- ggplot(dat_clean,
+       aes(x = Timepoint,
+           y = HR)) +
+
+  ## Participant trajectories
+  geom_line(
+    aes(group = interaction(ID, Session)),
+    colour = "grey75",
+    alpha = .10,
+    linewidth = .45
+  ) +
+
+  ## Raw observations
+  geom_quasirandom(
+    aes(colour = Session),
+    width = .10,
+    size = 2.6,
+    alpha = .55
+  ) +
+
+  scale_colour_manual(values = cols_raw) +
+
+  ## Reset colour scale
+  new_scale_colour() +
+
+  ## Error bars (dark colours)
+  geom_errorbar(
+    data = summary_df,
+    aes(
+      x = Timepoint,
+      y = Mean,
+      ymin = Lower,
+      ymax = Upper,
+      colour = Session
+    ),
+    width = .1,
+    linewidth = 1.0,
+    inherit.aes = FALSE
+  ) +
+
+  scale_colour_manual(values = cols_mean) +
+
+  ## Means
+  geom_point(
+    data = summary_df,
+    aes(
+      x = Timepoint,
+      y = Mean,
+      fill = Session
+    ),
+    shape = 21,
+    size = 5,
+    colour = "grey15",
+    stroke = 0.1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_fill_manual(values = cols_mean) +
+
+  labs(
+    x = expression(atop("Time (min)")),
+    y = expression(atop("Heart rate (bpm)"))
+  ) +
+
+  theme_classic(base_size = 15) +
+
+  theme(
+
+    legend.position = "",
+
+    axis.title.y =
+      element_text(
+        face = "bold",
+        size = 18
+      ),
+
+    axis.text =
+      element_text(
+        colour = "black",
+        size = 16
+      ),
+
+    strip.background =
+      element_rect(
+        fill = "grey95",
+        colour = NA
+      ),
+
+    strip.text =
+      element_text(
+        face = "bold",
+        size = 18
+      ),
+
+    panel.spacing =
+      unit(1.3, "cm")
+  )
+```
+INTERMITTENT SPO2
+```{r echo=FALSE}
+library(ARTool)
+phys_int$Session <- factor(
+  phys_int$Session,
+  levels = c("0", "1")
+)
+
+phys_int$Block <- factor(
+  phys_int$Block,
+  levels = c("0", "1", "2", "3", "4", "5", "6")
+)
+
+phys_int$sub_id <- factor(
+  phys_int$sub_id
+)
+
+dat_clean <- phys_int[!is.na(phys_int$SpO2), ]
+
+m <- art(
+  SpO2 ~ Session *Block + (1|sub_id),
+  data = dat_clean
+)
+
+anova(m)
+
+art.con(
+  m, ~ Session
+)
+
+art.con(
+  m, ~ Block
+)
+
+art.con(
+  m, ~ Session*Block
+)
+
+#FIGURE#
+
+library(ggplot2)
+library(ggbeeswarm)
+library(dplyr)
+library(ggnewscale)
+
+## Colours
+cols_raw <- c(
+  "Sham"    = "#9EC5FE",
+  "Hypoxia" = "#F6A3B4"
+)
+
+cols_mean <- c(
+  "Sham"    = "#2D7FF9",
+  "Hypoxia" = "#D7264C"
+)
+
+## Factors
+dat_clean$Session <- factor(
+  dat_clean$Session,
+  levels = c("0","1"),
+  labels = c("Sham","Hypoxia")
+)
+
+dat_clean$Block <- factor(
+  dat_clean$Block,
+  levels = c("0", "1", "2", "3", "4", "5", "6"),
+  labels = c("Pre","1", "2", "3", "4", "5", "6")
+)
+
+## Summary statistics
+summary_df <-
+  dat_clean %>%
+  group_by(Block, Session) %>%
+  summarise(
+    Mean  = mean(SpO2, na.rm = TRUE),
+    SE    = sd(SpO2, na.rm = TRUE) /
+              sqrt(sum(!is.na(SpO2))),
+    Lower = Mean - 1.96 * SE,
+    Upper = Mean + 1.96 * SE,
+    .groups = "drop"
+  )
+
+p <- ggplot(dat_clean,
+       aes(x = Block,
+           y = SpO2)) +
+
+  ## Participant trajectories
+  geom_line(
+    aes(group = interaction(sub_id, Session)),
+    colour = "grey75",
+    alpha = .10,
+    linewidth = .45
+  ) +
+
+  ## Raw observations
+  geom_quasirandom(
+    aes(colour = Session),
+    width = .10,
+    size = 2.6,
+    alpha = .55
+  ) +
+
+  scale_colour_manual(values = cols_raw) +
+
+  ## Reset colour scale
+  new_scale_colour() +
+
+  ## Error bars (dark colours)
+  geom_errorbar(
+    data = summary_df,
+    aes(
+      x = Block,
+      y = Mean,
+      ymin = Lower,
+      ymax = Upper,
+      colour = Session
+    ),
+    width = .1,
+    linewidth = 1.0,
+    inherit.aes = FALSE
+  ) +
+
+  scale_colour_manual(values = cols_mean) +
+
+  ## Means
+  geom_point(
+    data = summary_df,
+    aes(
+      x = Block,
+      y = Mean,
+      fill = Session
+    ),
+    shape = 21,
+    size = 5,
+    colour = "grey15",
+    stroke = 0.1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_fill_manual(values = cols_mean) +
+
+  labs(
+    x = expression(atop("Cycle block")),
+    y = expression(atop("SpO2 (%)"))
+  ) +
+
+  theme_classic(base_size = 15) +
+
+  theme(
+
+    legend.position = "none",
+
+    axis.title.y =
+      element_text(
+        face = "bold",
+        size = 18
+      ),
+
+    axis.text =
+      element_text(
+        colour = "black",
+        size = 16
+      ),
+
+    strip.background =
+      element_rect(
+        fill = "grey95",
+        colour = NA
+      ),
+
+    strip.text =
+      element_text(
+        face = "bold",
+        size = 18
+      ),
+
+    panel.spacing =
+      unit(1.3, "cm")
+  )
+```
+INTERMITTENT HR
+```{r echo=FALSE}
+library(ARTool)
+phys_int$Session <- factor(
+  phys_int$Session,
+  levels = c("0", "1")
+)
+
+phys_int$Block <- factor(
+  phys_int$Block,
+  levels = c("0", "1", "2", "3", "4", "5", "6")
+)
+
+phys_int$sub_id <- factor(
+  phys_int$sub_id
+)
+
+dat_clean <- phys_int[!is.na(phys_int$HR), ]
+
+m <- art(
+  HR ~ Session *Block + (1|sub_id),
+  data = dat_clean
+)
+
+anova(m)
+
+art.con(
+  m, ~ Session
+)
+
+art.con(
+  m, ~ Block
+)
+
+art.con(
+  m, ~ Session*Block
+)
+
+#FIGURE#
+
+library(ggplot2)
+library(ggbeeswarm)
+library(dplyr)
+library(ggnewscale)
+
+## Colours
+cols_raw <- c(
+  "Sham"    = "#9EC5FE",
+  "Hypoxia" = "#F6A3B4"
+)
+
+cols_mean <- c(
+  "Sham"    = "#2D7FF9",
+  "Hypoxia" = "#D7264C"
+)
+
+## Factors
+dat_clean$Session <- factor(
+  dat_clean$Session,
+  levels = c("0","1"),
+  labels = c("Sham","Hypoxia")
+)
+
+dat_clean$Block <- factor(
+  dat_clean$Block,
+  levels = c("0", "1", "2", "3", "4", "5", "6"),
+  labels = c("Pre","1", "2", "3", "4", "5", "6")
+)
+
+## Summary statistics
+summary_df <-
+  dat_clean %>%
+  group_by(Block, Session) %>%
+  summarise(
+    Mean  = mean(HR, na.rm = TRUE),
+    SE    = sd(HR, na.rm = TRUE) /
+              sqrt(sum(!is.na(HR))),
+    Lower = Mean - 1.96 * SE,
+    Upper = Mean + 1.96 * SE,
+    .groups = "drop"
+  )
+
+p <- ggplot(dat_clean,
+       aes(x = Block,
+           y = HR)) +
+
+  ## Participant trajectories
+  geom_line(
+    aes(group = interaction(sub_id, Session)),
+    colour = "grey75",
+    alpha = .10,
+    linewidth = .45
+  ) +
+
+  ## Raw observations
+  geom_quasirandom(
+    aes(colour = Session),
+    width = .10,
+    size = 2.6,
+    alpha = .55
+  ) +
+
+  scale_colour_manual(values = cols_raw) +
+
+  ## Reset colour scale
+  new_scale_colour() +
+
+  ## Error bars (dark colours)
+  geom_errorbar(
+    data = summary_df,
+    aes(
+      x = Block,
+      y = Mean,
+      ymin = Lower,
+      ymax = Upper,
+      colour = Session
+    ),
+    width = .1,
+    linewidth = 1.0,
+    inherit.aes = FALSE
+  ) +
+
+  scale_colour_manual(values = cols_mean) +
+
+  ## Means
+  geom_point(
+    data = summary_df,
+    aes(
+      x = Block,
+      y = Mean,
+      fill = Session
+    ),
+    shape = 21,
+    size = 5,
+    colour = "grey15",
+    stroke = 0.1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_fill_manual(values = cols_mean) +
+
+  labs(
+    x = expression(atop("Cycle block")),
+    y = expression(atop("Heart rate (bpm)"))
+  ) +
+
+  theme_classic(base_size = 15) +
+
+  theme(
+
+    legend.position = "none",
+
+    axis.title.y =
+      element_text(
+        face = "bold",
+        size = 18
+      ),
+
+    axis.text =
+      element_text(
+        colour = "black",
+        size = 16
+      ),
+
+    strip.background =
+      element_rect(
+        fill = "grey95",
+        colour = NA
+      ),
+
+    strip.text =
+      element_text(
+        face = "bold",
+        size = 18
+      ),
+
+    panel.spacing =
+      unit(1.3, "cm")
+  )
+```
+
+PATH INTEGRATION TIME TO COMPLETE
+```{r echo=FALSE}
+library(ARTool)
+library(dplyr)
+
+dat$session <- factor(
+  dat$session,
+  levels = c("ses-0", "ses-1")
+)
+
+dat$intervention <- factor(
+  dat$intervention,
+  levels = c("continuous", "intermittent")
+)
+
+dat$subject <- factor(
+  dat$subject
+)
+
+dat_clean <- dat[!is.na(dat$average_pi_total_time_change), ]
+
+
+#ART ANOVA
+m <- art(
+  average_pi_total_time_change ~ intervention * session + (1|subject),
+  data = dat_clean
+)
+
+anova(m)
+
+#REGRESSION ON SPO2
+hx_dat <- dat_clean %>%
+  filter(session == "ses-1")
+
+reg <- lm(
+  average_pi_total_time_change ~ spo2 * intervention,
+  data = hx_dat
+)
+
+summary(reg)
+```
+
+PATH INTEGRATION DISTANCE ERROR
+```{r echo=FALSE}
+library(ARTool)
+library(dplyr)
+
+dat$session <- factor(
+  dat$session,
+  levels = c("ses-0", "ses-1")
+)
+
+dat$intervention <- factor(
+  dat$intervention,
+  levels = c("continuous", "intermittent")
+)
+
+dat$subject <- factor(
+  dat$subject)
+
+dat_clean <- dat[!is.na(dat$average_pi_distance_change), ]
+
+#ART ANOVA
+m <- art(
+  average_pi_distance_change ~ intervention * session + (1|subject),
+  data = dat_clean
+)
+
+anova(m)
+
+art.con(m, ~session)
+
+#REGRESSION ON SPO2
+hx_dat <- dat_clean %>%
+  filter(session == "ses-1")
+
+reg <- lm(
+  average_pi_distance_change ~ spo2 * intervention,
+  data = hx_dat
+)
+
+summary(reg)
+
+#FIGURE#
+
+library(ggplot2)
+library(ggbeeswarm)
+library(ggnewscale)
+
+## Colours
+cols_raw <- c(
+  "Sham"    = "#9EC5FE",
+  "Hypoxia" = "#F6A3B4"
+)
+
+cols_mean <- c(
+  "Sham"    = "#2D7FF9",
+  "Hypoxia" = "#D7264C"
+)
+
+## Factors
+dat_clean$session <- factor(
+  dat_clean$session,
+  levels = c("ses-0","ses-1"),
+  labels = c("Sham","Hypoxia")
+)
+
+dat_clean$intervention <- factor(
+  dat_clean$intervention,
+  levels = c("continuous","intermittent"),
+  labels = c("ACH","AIH")
+)
+
+## Summary statistics
+summary_df <-
+  dat_clean %>%
+  group_by(intervention, session) %>%
+  summarise(
+    Mean  = mean(average_pi_distance_change, na.rm = TRUE),
+    SE    = sd(average_pi_distance_change, na.rm = TRUE) /
+              sqrt(sum(!is.na(average_pi_distance_change))),
+    Lower = Mean - 1.96 * SE,
+    Upper = Mean + 1.96 * SE,
+    .groups = "drop"
+  )
+
+p <- ggplot(dat_clean,
+       aes(x = session,
+           y = average_pi_distance_change)) +
+
+  ## Participant trajectories
+  geom_line(
+    aes(group = subject),
+    colour = "grey75",
+    alpha = .10,
+    linewidth = .45
+  ) +
+
+  ## Raw observations
+  geom_quasirandom(
+    aes(colour = session),
+    width = .10,
+    size = 2.6,
+    alpha = .55
+  ) +
+
+  scale_colour_manual(values = cols_raw) +
+
+  ## Reset colour scale
+  new_scale_colour() +
+
+  ## Error bars (dark colours)
+  geom_errorbar(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      ymin = Lower,
+      ymax = Upper,
+      colour = session
+    ),
+    width = .1,
+    linewidth = 1.0,
+    inherit.aes = FALSE
+  ) +
+
+  scale_colour_manual(values = cols_mean) +
+
+  ## Means
+  geom_point(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      fill = session
+    ),
+    shape = 21,
+    size = 5,
+    colour = "grey15",
+    stroke = 0.1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_fill_manual(values = cols_mean) +
+
+  facet_wrap(
+    ~intervention,
+    nrow = 1
+  ) +
+
+  labs(
+    x = NULL,
+    y = expression(atop("Path integration distance",
+                      "error (GU)"))
+  ) +
+
+  theme_classic(base_size = 15) +
+
+  theme(
+
+    legend.position = "none",
+
+    axis.title.y =
+      element_text(
+        face = "bold",
+        size = 24
+      ),
+
+    axis.text =
+      element_text(
+        colour = "black",
+        size = 20
+      ),
+
+    strip.background =
+      element_rect(
+        fill = "grey95",
+        colour = NA
+      ),
+
+    strip.text =
+      element_text(
+        face = "bold",
+        size = 24
+      ),
+
+    panel.spacing =
+      unit(1.3, "cm")
+  )
+```
+
+EGOCENTRIC POINTING ERROR
+```{r echo=FALSE}
+library(ARTool)
+library(dplyr)
+library(emmeans)
+
+dat$session <- factor(
+  dat$session,
+  levels = c("ses-0", "ses-1")
+)
+
+dat$intervention <- factor(
+  dat$intervention,
+  levels = c("continuous", "intermittent")
+)
+
+dat$subject <- factor(
+  dat$subject)
+
+dat_clean <- dat[!is.na(dat$average_absolute_pointing_error_change), ]
+
+#ART ANOVA
+m <- art(
+  average_absolute_pointing_error_change ~ intervention * session + (1|subject),
+  data = dat_clean
+)
+
+anova(m)
+
+art.con(m, ~ session)
+
+#REGRESSION ON SPO2
+hx_dat <- dat_clean %>%
+  filter(session == "ses-1")
+
+reg <- lm(
+  average_absolute_pointing_error_change ~ spo2 * intervention,
+  data = hx_dat
+)
+
+summary(reg)
+
+emtrends(
+  reg,
+  ~ intervention,
+  var = "spo2"
+)
+
+#FIGURE#
+
+library(ggplot2)
+library(ggbeeswarm)
+library(ggnewscale)
+
+## Colours
+cols_raw <- c(
+  "Sham"    = "#9EC5FE",
+  "Hypoxia" = "#F6A3B4"
+)
+
+cols_mean <- c(
+  "Sham"    = "#2D7FF9",
+  "Hypoxia" = "#D7264C"
+)
+
+## Factors
+dat_clean$session <- factor(
+  dat_clean$session,
+  levels = c("ses-0","ses-1"),
+  labels = c("Sham","Hypoxia")
+)
+
+dat_clean$intervention <- factor(
+  dat_clean$intervention,
+  levels = c("continuous","intermittent"),
+  labels = c("ACH","AIH")
+)
+
+## Summary statistics
+summary_df <-
+  dat_clean %>%
+  group_by(intervention, session) %>%
+  summarise(
+    Mean  = mean(average_absolute_pointing_error_change, na.rm = TRUE),
+    SE    = sd(average_absolute_pointing_error_change, na.rm = TRUE) /
+              sqrt(sum(!is.na(average_absolute_pointing_error_change))),
+    Lower = Mean - 1.96 * SE,
+    Upper = Mean + 1.96 * SE,
+    .groups = "drop"
+  )
+
+p <- ggplot(dat_clean,
+       aes(x = session,
+           y = average_absolute_pointing_error_change)) +
+
+  ## Participant trajectories
+  geom_line(
+    aes(group = subject),
+    colour = "grey75",
+    alpha = .10,
+    linewidth = .45
+  ) +
+
+  ## Raw observations
+  geom_quasirandom(
+    aes(colour = session),
+    width = .10,
+    size = 2.6,
+    alpha = .55
+  ) +
+
+  scale_colour_manual(values = cols_raw) +
+
+  ## Reset colour scale
+  new_scale_colour() +
+
+  ## Error bars (dark colours)
+  geom_errorbar(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      ymin = Lower,
+      ymax = Upper,
+      colour = session
+    ),
+    width = .1,
+    linewidth = 1.0,
+    inherit.aes = FALSE
+  ) +
+
+  scale_colour_manual(values = cols_mean) +
+
+  ## Means
+  geom_point(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      fill = session
+    ),
+    shape = 21,
+    size = 5,
+    colour = "grey15",
+    stroke = 0.1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_fill_manual(values = cols_mean) +
+
+  facet_wrap(
+    ~intervention,
+    nrow = 1
+  ) +
+
+  labs(
+    x = NULL,
+    y = expression(atop("Egocentric pointing",
+                      "error ("*degree*")"))
+  ) +
+
+  theme_classic(base_size = 15) +
+
+  theme(
+
+    legend.position = "none",
+
+    axis.title.y =
+      element_text(
+        face = "bold",
+        size = 24
+      ),
+
+    axis.text =
+      element_text(
+        colour = "black",
+        size = 20
+      ),
+
+    strip.background =
+      element_rect(
+        fill = "grey95",
+        colour = NA
+      ),
+
+    strip.text =
+      element_text(
+        face = "bold",
+        size = 24
+      ),
+
+    panel.spacing =
+      unit(1.3, "cm")
+  )
+```
+
+MAPPING R2 FIT
+```{r echo=FALSE}
+library(ARTool)
+library(dplyr)
+
+dat$session <- factor(
+  dat$session,
+  levels = c("ses-0", "ses-1")
+)
+
+dat$intervention <- factor(
+  dat$intervention,
+  levels = c("continuous", "intermittent")
+)
+
+dat$subject <- factor(
+  dat$subject)
+
+dat_clean <- dat[!is.na(dat$mapping_rsquare_change), ]
+
+m <- art(
+  mapping_rsquare_change ~ intervention * session + (1|subject),
+  data = dat_clean
+)
+
+anova(m)
+
+art.con(m, ~ session)
+art.con(m, ~ intervention*session)
+
+#REGRESSION ON SPO2
+hx_dat <- dat_clean %>%
+  filter(session == "ses-1")
+
+reg <- lm(
+  mapping_rsquare_change ~ spo2 * intervention,
+  data = hx_dat
+)
+
+summary(reg)
+
+emtrends(
+  reg,
+  ~ intervention,
+  var = "spo2"
+)
+
+#FIGURE#
+
+library(ggplot2)
+library(ggbeeswarm)
+library(dplyr)
+library(ggnewscale)
+
+## Colours
+cols_raw <- c(
+  "Sham"    = "#9EC5FE",
+  "Hypoxia" = "#F6A3B4"
+)
+
+cols_mean <- c(
+  "Sham"    = "#2D7FF9",
+  "Hypoxia" = "#D7264C"
+)
+
+## Factors
+dat_clean$session <- factor(
+  dat_clean$session,
+  levels = c("ses-0","ses-1"),
+  labels = c("Sham","Hypoxia")
+)
+
+dat_clean$intervention <- factor(
+  dat_clean$intervention,
+  levels = c("continuous","intermittent"),
+  labels = c("ACH","AIH")
+)
+
+## Summary statistics
+summary_df <-
+  dat_clean %>%
+  group_by(intervention, session) %>%
+  summarise(
+    Mean  = mean(mapping_rsquare_change, na.rm = TRUE),
+    SE    = sd(mapping_rsquare_change, na.rm = TRUE) /
+              sqrt(sum(!is.na(mapping_rsquare_change))),
+    Lower = Mean - 1.96 * SE,
+    Upper = Mean + 1.96 * SE,
+    .groups = "drop"
+  )
+
+p <- ggplot(dat_clean,
+       aes(x = session,
+           y = mapping_rsquare_change)) +
+
+  ## Participant trajectories
+  geom_line(
+    aes(group = subject),
+    colour = "grey75",
+    alpha = .10,
+    linewidth = .45
+  ) +
+
+  ## Raw observations
+  geom_quasirandom(
+    aes(colour = session),
+    width = .10,
+    size = 2.6,
+    alpha = .55
+  ) +
+
+  scale_colour_manual(values = cols_raw) +
+
+  ## Reset colour scale
+  new_scale_colour() +
+
+  ## Error bars (dark colours)
+  geom_errorbar(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      ymin = Lower,
+      ymax = Upper,
+      colour = session
+    ),
+    width = .1,
+    linewidth = 1.0,
+    inherit.aes = FALSE
+  ) +
+
+  scale_colour_manual(values = cols_mean) +
+
+  ## Means
+  geom_point(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      fill = session
+    ),
+    shape = 21,
+    size = 5,
+    colour = "grey15",
+    stroke = 0.1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_fill_manual(values = cols_mean) +
+
+  facet_wrap(
+    ~intervention,
+    nrow = 1
+  ) +
+
+  labs(
+    x = NULL,
+    y = expression(atop("Mapping fit",
+                        "("*R^2*")"))
+  ) +
+
+  theme_classic(base_size = 15) +
+
+  theme(
+
+    legend.position = "none",
+
+    axis.title.y =
+      element_text(
+        face = "bold",
+        size = 24
+      ),
+
+    axis.text =
+      element_text(
+        colour = "black",
+        size = 20
+      ),
+
+    strip.background =
+      element_rect(
+        fill = "grey95",
+        colour = NA
+      ),
+
+    strip.text =
+      element_text(
+        face = "bold",
+        size = 24
+      ),
+
+    panel.spacing =
+      unit(1.3, "cm")
+  )
+```
+
+PERSPECTIVE TAKING ERROR
+```{r echo=FALSE}
+library(ARTool)
+library(dplyr)
+
+dat$session <- factor(
+  dat$session,
+  levels = c("ses-0", "ses-1")
+)
+
+dat$intervention <- factor(
+  dat$intervention,
+  levels = c("continuous", "intermittent")
+)
+
+dat$subject <- factor(
+  dat$subject)
+
+dat_clean <- dat[!is.na(dat$average_absolute_perspective_taking_error_change), ]
+
+m <- art(
+  average_absolute_perspective_taking_error_change ~ intervention * session + (1|subject),
+  data = dat_clean
+)
+
+anova(m)
+
+art.con(m, ~ session)
+art.con(m , ~ intervention*session)
+
+#REGRESSION ON SPO2
+hx_dat <- dat_clean %>%
+  filter(session == "ses-1")
+
+reg <- lm(
+  average_absolute_perspective_taking_error_change ~ spo2 * intervention,
+  data = hx_dat
+)
+
+summary(reg)
+
+emtrends(
+  reg,
+  ~ intervention,
+  var = "spo2"
+)
+
+#FIGURE#
+
+library(ggplot2)
+library(ggbeeswarm)
+library(ggnewscale)
+
+## Colours
+cols_raw <- c(
+  "Sham"    = "#9EC5FE",
+  "Hypoxia" = "#F6A3B4"
+)
+
+cols_mean <- c(
+  "Sham"    = "#2D7FF9",
+  "Hypoxia" = "#D7264C"
+)
+
+## Factors
+dat_clean$session <- factor(
+  dat_clean$session,
+  levels = c("ses-0","ses-1"),
+  labels = c("Sham","Hypoxia")
+)
+
+dat_clean$intervention <- factor(
+  dat_clean$intervention,
+  levels = c("continuous","intermittent"),
+  labels = c("ACH","AIH")
+)
+
+## Summary statistics
+summary_df <-
+  dat_clean %>%
+  group_by(intervention, session) %>%
+  summarise(
+    Mean  = mean(average_absolute_pointing_error_change, na.rm = TRUE),
+    SE    = sd(average_absolute_pointing_error_change, na.rm = TRUE) /
+              sqrt(sum(!is.na(average_absolute_pointing_error_change))),
+    Lower = Mean - 1.96 * SE,
+    Upper = Mean + 1.96 * SE,
+    .groups = "drop"
+  )
+
+p <- ggplot(dat_clean,
+       aes(x = session,
+           y = average_absolute_pointing_error_change)) +
+
+  ## Participant trajectories
+  geom_line(
+    aes(group = subject),
+    colour = "grey75",
+    alpha = .10,
+    linewidth = .45
+  ) +
+
+  ## Raw observations
+  geom_quasirandom(
+    aes(colour = session),
+    width = .10,
+    size = 2.6,
+    alpha = .55
+  ) +
+
+  scale_colour_manual(values = cols_raw) +
+
+  ## Reset colour scale
+  new_scale_colour() +
+
+  ## Error bars (dark colours)
+  geom_errorbar(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      ymin = Lower,
+      ymax = Upper,
+      colour = session
+    ),
+    width = .1,
+    linewidth = 1.0,
+    inherit.aes = FALSE
+  ) +
+
+  scale_colour_manual(values = cols_mean) +
+
+  ## Means
+  geom_point(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      fill = session
+    ),
+    shape = 21,
+    size = 5,
+    colour = "grey15",
+    stroke = 0.1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_fill_manual(values = cols_mean) +
+
+  facet_wrap(
+    ~intervention,
+    nrow = 1
+  ) +
+
+  labs(
+    x = NULL,
+    y = expression(atop("Perspective-taking",
+                      "error ("*degree*")"))
+  ) +
+
+  theme_classic(base_size = 15) +
+
+  theme(
+
+    legend.position = "none",
+
+    axis.title.y =
+      element_text(
+        face = "bold",
+        size = 24
+      ),
+
+    axis.text =
+      element_text(
+        colour = "black",
+        size = 20
+      ),
+
+    strip.background =
+      element_rect(
+        fill = "grey95",
+        colour = NA
+      ),
+
+    strip.text =
+      element_text(
+        face = "bold",
+        size = 24
+      ),
+
+    panel.spacing =
+      unit(1.3, "cm")
+  )
+```
+
+EXPONENT
+```{r echo=FALSE}
+library(ARTool)
+library(dplyr)
+
+dat$session <- factor(
+  dat$session,
+  levels = c("ses-0", "ses-1")
+)
+
+dat$intervention <- factor(
+  dat$intervention,
+  levels = c("continuous", "intermittent")
+)
+
+dat$eye_state <- factor(
+  dat$eye_state,
+  levels = c("EC", "EO")
+)
+
+dat$subject <- factor(
+  dat$subject)
+
+dat_clean <- dat[!is.na(dat$exponent_mean_change), ]
+
+m <- art(
+  exponent_mean_change ~ intervention * session * eye_state + (1|subject),
+  data = dat_clean
+)
+
+anova(m)
+
+art.con(
+  m, ~ session)
+
+art.con(
+  m, ~ intervention*session)
+
+#REGRESSION ON SPO2
+hx_dat <- dat_clean %>%
+  filter(session == "ses-1")
+
+reg <- lm(
+  exponent_mean_change ~ spo2 * intervention,
+  data = hx_dat
+)
+
+summary(reg)
+
+emtrends(
+  reg,
+  ~ intervention,
+  var = "spo2"
+)
+
+#FIGURE#
+
+library(ggplot2)
+library(ggbeeswarm)
+library(ggnewscale)
+
+## Colours
+cols_raw <- c(
+  "Sham"    = "#9EC5FE",
+  "Hypoxia" = "#F6A3B4"
+)
+
+cols_mean <- c(
+  "Sham"    = "#2D7FF9",
+  "Hypoxia" = "#D7264C"
+)
+
+## Factors
+dat_clean$session <- factor(
+  dat_clean$session,
+  levels = c("ses-0","ses-1"),
+  labels = c("Sham","Hypoxia")
+)
+
+dat_clean$intervention <- factor(
+  dat_clean$intervention,
+  levels = c("continuous","intermittent"),
+  labels = c("ACH","AIH")
+)
+
+plot_dat <-
+  dat_clean %>%
+  group_by(subject, intervention, session) %>%
+  summarise(
+    exponent_mean_change = mean(exponent_mean_change),
+    .groups = "drop"
+  )
+
+## Summary statistics
+summary_df <-
+  plot_dat %>%
+  group_by(intervention, session) %>%
+  summarise(
+    Mean = mean(exponent_mean_change),
+    SE   = sd(exponent_mean_change)/sqrt(n()),
+    Lower = Mean - 1.96*SE,
+    Upper = Mean + 1.96*SE,
+    .groups="drop"
+  )
+
+p <- ggplot(dat_clean,
+       aes(x = session,
+           y = exponent_mean_change)) +
+
+  ## Participant trajectories
+  geom_line(
+    aes(group = subject),
+    colour = "grey75",
+    alpha = .18,
+    linewidth = .45
+  ) +
+
+  ## Raw observations
+  geom_quasirandom(
+    aes(colour = session),
+    width = .10,
+    size = 2.6,
+    alpha = .65
+  ) +
+
+  scale_colour_manual(values = cols_raw) +
+
+  ## Reset colour scale
+  new_scale_colour() +
+
+  ## Error bars (dark colours)
+  geom_errorbar(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      ymin = Lower,
+      ymax = Upper,
+      colour = session
+    ),
+    width = .1,
+    linewidth = 1.0,
+    inherit.aes = FALSE
+  ) +
+
+  scale_colour_manual(values = cols_mean) +
+
+  ## Means
+  geom_point(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      fill = session
+    ),
+    shape = 21,
+    size = 5,
+    colour = "gray15",
+    stroke = 0.1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_fill_manual(values = cols_mean) +
+
+  facet_wrap(
+    ~intervention,
+    nrow = 1
+  ) +
+
+  labs(
+    x = NULL,
+    y = expression(atop("Exponent",
+                      "(a.u.)"))
+  ) +
+
+  theme_classic(base_size = 15) +
+
+  theme(
+
+    legend.position = "none",
+
+    axis.title.y =
+      element_text(
+        face = "bold",
+        size = 18
+      ),
+
+    axis.text =
+      element_text(
+        colour = "black",
+        size = 16
+      ),
+
+    strip.background =
+      element_rect(
+        fill = "grey95",
+        colour = NA
+      ),
+
+    strip.text =
+      element_text(
+        face = "bold",
+        size = 16
+      ),
+
+    panel.spacing =
+      unit(1.3, "cm")
+  )
+```
+
+OFFSET
+```{r echo=FALSE}
+library(ARTool)
+library(dplyr)
+
+dat$session <- factor(
+  dat$session,
+  levels = c("ses-0", "ses-1")
+)
+
+dat$intervention <- factor(
+  dat$intervention,
+  levels = c("continuous", "intermittent")
+)
+
+dat$eye_state <- factor(
+  dat$eye_state,
+  levels = c("EC", "EO")
+)
+
+dat$subject <- factor(
+  dat$subject)
+
+dat_clean <- dat[!is.na(dat$offset_mean_change), ]
+
+m <- art(
+  offset_mean_change ~ intervention * session * eye_state + (1|subject),
+  data = dat_clean
+)
+
+anova(m)
+
+#REGRESSION ON SPO2
+hx_dat <- dat_clean %>%
+  filter(session == "ses-1")
+
+reg <- lm(
+  offset_mean_change ~ spo2 * intervention,
+  data = hx_dat
+)
+
+summary(reg)
+
+emtrends(
+  reg,
+  ~ intervention,
+  var = "spo2"
+)
+
+#FIGURE#
+library(ggplot2)
+library(ggbeeswarm)
+library(ggnewscale)
+
+## Colours
+cols_raw <- c(
+  "Sham"    = "#9EC5FE",
+  "Hypoxia" = "#F6A3B4"
+)
+
+cols_mean <- c(
+  "Sham"    = "#2D7FF9",
+  "Hypoxia" = "#D7264C"
+)
+
+## Factors
+dat_clean$session <- factor(
+  dat_clean$session,
+  levels = c("ses-0","ses-1"),
+  labels = c("Sham","Hypoxia")
+)
+
+dat_clean$intervention <- factor(
+  dat_clean$intervention,
+  levels = c("continuous","intermittent"),
+  labels = c("ACH","AIH")
+)
+
+plot_dat <-
+  dat_clean %>%
+  group_by(subject, intervention, session) %>%
+  summarise(
+    offset_mean_change = mean(offset_mean_change),
+    .groups = "drop"
+  )
+
+## Summary statistics
+summary_df <-
+  plot_dat %>%
+  group_by(intervention, session) %>%
+  summarise(
+    Mean = mean(offset_mean_change),
+    SE   = sd(offset_mean_change)/sqrt(n()),
+    Lower = Mean - 1.96*SE,
+    Upper = Mean + 1.96*SE,
+    .groups="drop"
+  )
+
+p <- ggplot(dat_clean,
+       aes(x = session,
+           y = offset_mean_change)) +
+
+  ## Participant trajectories
+  geom_line(
+    aes(group = subject),
+    colour = "grey75",
+    alpha = .18,
+    linewidth = .45
+  ) +
+
+  ## Raw observations
+  geom_quasirandom(
+    aes(colour = session),
+    width = .10,
+    size = 2.6,
+    alpha = .65
+  ) +
+
+  scale_colour_manual(values = cols_raw) +
+
+  ## Reset colour scale
+  new_scale_colour() +
+
+  ## Error bars (dark colours)
+  geom_errorbar(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      ymin = Lower,
+      ymax = Upper,
+      colour = session
+    ),
+    width = .1,
+    linewidth = 1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_colour_manual(values = cols_mean) +
+
+  ## Means
+  geom_point(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      fill = session
+    ),
+    shape = 21,
+    size = 5,
+    colour = "grey15",
+    stroke = 0.1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_fill_manual(values = cols_mean) +
+
+  facet_wrap(
+    ~intervention,
+    nrow = 1
+  ) +
+
+  labs(
+    x = NULL,
+    y = "Offset (uV)"
+  ) +
+
+  theme_classic(base_size = 15) +
+
+  theme(
+
+    legend.position = "none",
+
+    axis.title.y =
+      element_text(
+        face = "bold",
+        size = 18
+      ),
+
+    axis.text =
+      element_text(
+        colour = "black",
+        size = 16
+      ),
+
+    strip.background =
+      element_rect(
+        fill = "grey95",
+        colour = NA
+      ),
+
+    strip.text =
+      element_text(
+        face = "bold",
+        size = 16
+      ),
+
+    panel.spacing =
+      unit(1.3, "cm")
+  )
+```
+
+ALPHA POWER
+```{r echo=FALSE}
+library(ARTool)
+library(dplyr)
+
+dat$session <- factor(
+  dat$session,
+  levels = c("ses-0", "ses-1")
+)
+
+dat$intervention <- factor(
+  dat$intervention,
+  levels = c("continuous", "intermittent")
+)
+
+dat$eye_state <- factor(
+  dat$eye_state,
+  levels = c("EC", "EO")
+)
+
+dat$subject <- factor(
+  dat$subject)
+
+dat_clean <- dat[!is.na(dat$alpha_pow_mean_change), ]
+
+m <- art(
+  alpha_pow_mean_change ~ intervention * session * eye_state + (1|subject),
+  data = dat_clean
+)
+
+anova(m)
+art.con(
+  m, ~ intervention
+)
+
+art.con(
+  m, ~ session
+)
+
+art.con(
+  m, ~ intervention*eye_state
+)
+
+#REGRESSION ON SPO2
+hx_dat <- dat_clean %>%
+  filter(session == "ses-1")
+
+reg <- lm(
+  alpha_pow_mean_change ~ spo2 * intervention,
+  data = hx_dat
+)
+
+summary(reg)
+
+emtrends(
+  reg,
+  ~ intervention,
+  var = "spo2"
+)
+
+library(ggplot2)
+library(ggbeeswarm)
+library(ggnewscale)
+
+## Colours
+cols_raw <- c(
+  "Sham"    = "#9EC5FE",
+  "Hypoxia" = "#F6A3B4"
+)
+
+cols_mean <- c(
+  "Sham"    = "#2D7FF9",
+  "Hypoxia" = "#D7264C"
+)
+
+## Factors
+dat_clean$session <- factor(
+  dat_clean$session,
+  levels = c("ses-0","ses-1"),
+  labels = c("Sham","Hypoxia")
+)
+
+dat_clean$intervention <- factor(
+  dat_clean$intervention,
+  levels = c("continuous","intermittent"),
+  labels = c("ACH","AIH")
+)
+
+plot_dat <-
+  dat_clean %>%
+  group_by(subject, intervention, eye_state, session) %>%
+  summarise(
+    alpha_pow_mean_change = mean(alpha_pow_mean_change),
+    .groups = "drop"
+  )
+
+## Summary statistics
+summary_df <-
+  plot_dat %>%
+  group_by(intervention, eye_state, session) %>%
+  summarise(
+    Mean = mean(alpha_pow_mean_change),
+    SE   = sd(alpha_pow_mean_change)/sqrt(n()),
+    Lower = Mean - 1.96*SE,
+    Upper = Mean + 1.96*SE,
+    .groups="drop"
+  )
+
+plot_dat$eye_state <- factor(
+  plot_dat$eye_state,
+  levels = c("EC","EO"),
+  labels = c("Eyes Closed","Eyes Open")
+)
+
+summary_df$eye_state <- factor(
+  summary_df$eye_state,
+  levels = c("EC","EO"),
+  labels = c("Eyes Closed","Eyes Open")
+)
+
+p <- ggplot(plot_dat,
+       aes(x = session,
+           y = alpha_pow_mean_change)) +
+
+  ## Participant trajectories
+  geom_line(
+    aes(group = subject),
+    colour = "grey75",
+    alpha = .18,
+    linewidth = .45
+  ) +
+
+  ## Raw observations
+  geom_quasirandom(
+    aes(colour = session),
+    width = .10,
+    size = 2.6,
+    alpha = .65
+  ) +
+
+  scale_colour_manual(values = cols_raw) +
+
+  ## Reset colour scale
+  new_scale_colour() +
+
+  ## Error bars (dark colours)
+  geom_errorbar(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      ymin = Lower,
+      ymax = Upper,
+      colour = session
+    ),
+    width = .1,
+    linewidth = 1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_colour_manual(values = cols_mean) +
+
+  ## Means
+  geom_point(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      fill = session
+    ),
+    shape = 21,
+    size = 5,
+    colour = "black",
+    stroke = 0.1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_fill_manual(values = cols_mean) +
+
+  facet_grid(
+    eye_state ~ intervention,
+  ) +
+
+  labs(
+    x = NULL,
+    y = expression(atop("Alpha power",
+                      "(" * mu * "V)"))
+  ) +
+
+  theme_classic(base_size = 15) +
+
+  theme(
+
+    legend.position = "none",
+
+    axis.title.y =
+      element_text(
+        face = "bold",
+        size = 18
+      ),
+
+    axis.text =
+      element_text(
+        colour = "black",
+        size = 16
+      ),
+
+    strip.background =
+      element_rect(
+        fill = "grey95",
+        colour = NA
+      ),
+
+    strip.text =
+      element_text(
+        face = "bold",
+        size = 16
+      ),
+
+    panel.spacing =
+      unit(1.3, "cm")
+  )
+```
+
+ALPHA FREQUENCY
+```{r echo=FALSE}
+library(ARTool)
+library(dplyr)
+
+dat$session <- factor(
+  dat$session,
+  levels = c("ses-0", "ses-1")
+)
+
+dat$intervention <- factor(
+  dat$intervention,
+  levels = c("continuous", "intermittent")
+)
+
+dat$eye_state <- factor(
+  dat$eye_state,
+  levels = c("EC", "EO")
+)
+
+dat$subject <- factor(
+  dat$subject)
+
+dat_clean <- dat[!is.na(dat$alpha_freq_mean_change), ]
+
+m <- art(
+  alpha_freq_mean_change ~ intervention * session * eye_state + (1|subject),
+  data = dat_clean
+)
+
+anova(m)
+
+#REGRESSION ON SPO2
+hx_dat <- dat_clean %>%
+  filter(session == "ses-1")
+
+reg <- lm(
+  alpha_freq_mean_change ~ spo2 * intervention,
+  data = hx_dat
+)
+
+summary(reg)
+```
+
+BETA POWER
+```{r echo=FALSE}
+library(ARTool)
+
+dat$session <- factor(
+  dat$session,
+  levels = c("ses-0", "ses-1")
+)
+
+dat$intervention <- factor(
+  dat$intervention,
+  levels = c("continuous", "intermittent")
+)
+
+dat$eye_state <- factor(
+  dat$eye_state,
+  levels = c("EC", "EO")
+)
+
+dat$subject <- factor(
+  dat$subject)
+
+dat_clean <- dat[!is.na(dat$beta_pow_mean_change), ]
+
+m <- art(
+  beta_pow_mean_change ~ intervention * session * eye_state + (1|subject),
+  data = dat_clean
+)
+
+anova(m)
+art.con(
+  m, ~ intervention
+)
+
+art.con(
+  m, ~ session
+)
+
+art.con(
+  m, ~ intervention*eye_state
+)
+
+#REGRESSION ON SPO2
+hx_dat <- dat_clean %>%
+  filter(session == "ses-1")
+
+reg <- lm(
+  beta_pow_mean_change ~ spo2 * intervention,
+  data = hx_dat
+)
+
+summary(reg)
+
+library(ggplot2)
+library(ggbeeswarm)
+library(dplyr)
+library(ggnewscale)
+
+## Colours
+cols_raw <- c(
+  "Sham"    = "#9EC5FE",
+  "Hypoxia" = "#F6A3B4"
+)
+
+cols_mean <- c(
+  "Sham"    = "#2D7FF9",
+  "Hypoxia" = "#D7264C"
+)
+
+## Factors
+dat_clean$session <- factor(
+  dat_clean$session,
+  levels = c("ses-0","ses-1"),
+  labels = c("Sham","Hypoxia")
+)
+
+dat_clean$intervention <- factor(
+  dat_clean$intervention,
+  levels = c("continuous","intermittent"),
+  labels = c("ACH","AIH")
+)
+
+plot_dat <-
+  dat_clean %>%
+  group_by(subject, intervention, eye_state, session) %>%
+  summarise(
+    beta_pow_mean_change = mean(beta_pow_mean_change),
+    .groups = "drop"
+  )
+
+## Summary statistics
+summary_df <-
+  plot_dat %>%
+  group_by(intervention, eye_state, session) %>%
+  summarise(
+    Mean = mean(beta_pow_mean_change),
+    SE   = sd(beta_pow_mean_change)/sqrt(n()),
+    Lower = Mean - 1.96*SE,
+    Upper = Mean + 1.96*SE,
+    .groups="drop"
+  )
+
+plot_dat$eye_state <- factor(
+  plot_dat$eye_state,
+  levels = c("EC","EO"),
+  labels = c("Eyes Closed","Eyes Open")
+)
+
+summary_df$eye_state <- factor(
+  summary_df$eye_state,
+  levels = c("EC","EO"),
+  labels = c("Eyes Closed","Eyes Open")
+)
+
+p <- ggplot(plot_dat,
+       aes(x = session,
+           y = beta_pow_mean_change)) +
+
+  ## Participant trajectories
+  geom_line(
+    aes(group = subject),
+    colour = "grey75",
+    alpha = .18,
+    linewidth = .45
+  ) +
+
+  ## Raw observations
+  geom_quasirandom(
+    aes(colour = session),
+    width = .10,
+    size = 2.6,
+    alpha = .65
+  ) +
+
+  scale_colour_manual(values = cols_raw) +
+
+  ## Reset colour scale
+  new_scale_colour() +
+
+  ## Error bars (dark colours)
+  geom_errorbar(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      ymin = Lower,
+      ymax = Upper,
+      colour = session
+    ),
+    width = .1,
+    linewidth = 1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_colour_manual(values = cols_mean) +
+
+  ## Means
+  geom_point(
+    data = summary_df,
+    aes(
+      x = session,
+      y = Mean,
+      fill = session
+    ),
+    shape = 21,
+    size = 5,
+    colour = "black",
+    stroke = 0.1,
+    inherit.aes = FALSE
+  ) +
+
+  scale_fill_manual(values = cols_mean) +
+
+  facet_grid(
+    eye_state ~ intervention,
+  ) +
+
+  labs(
+    x = NULL,
+    y = expression(atop("Beta power",
+                      "(" * mu * "V)"))
+  ) +
+
+  theme_classic(base_size = 15) +
+
+  theme(
+
+    legend.position = "none",
+
+    axis.title.y =
+      element_text(
+        face = "bold",
+        size = 18
+      ),
+
+    axis.text =
+      element_text(
+        colour = "black",
+        size = 16
+      ),
+
+    strip.background =
+      element_rect(
+        fill = "grey95",
+        colour = NA
+      ),
+
+    strip.text =
+      element_text(
+        face = "bold",
+        size = 16
+      ),
+
+    panel.spacing =
+      unit(1.3, "cm")
+  )
+```
+
+BETA FREQUENCY
+```{r echo=FALSE}
+library(ARTool)
+library(dplyr)
+library(broom)
+
+dat$session <- factor(
+  dat$session,
+  levels = c("ses-0", "ses-1")
+)
+
+dat$intervention <- factor(
+  dat$intervention,
+  levels = c("continuous", "intermittent")
+)
+
+dat$eye_state <- factor(
+  dat$eye_state,
+  levels = c("EC", "EO")
+)
+
+dat$subject <- factor(
+  dat$subject)
+
+dat_clean <- dat[!is.na(dat$beta_freq_mean_change), ]
+
+m <- art(
+  beta_freq_mean_change ~ intervention * session * eye_state + (1|subject),
+  data = dat_clean
+)
+
+anova(m)
+art.con(
+  m, ~ intervention
+)
+
+art.con(
+  m, ~ session
+)
+
+#REGRESSION ON SPO2
+hx_dat <- dat_clean %>%
+  filter(session == "ses-1")
+
+reg <- lm(
+  beta_freq_mean_change ~ spo2 * intervention,
+  data = hx_dat
+)
+
+summary(reg)
+
+#MAKE SUPPLEMENTARY TABLES
+library(knitr)
+library(kableExtra)
+library(broom)
+
+
+#reg table
+reg_table <- tidy(reg) %>%
+  mutate(
+    p = case_when(
+      p.value < .001 ~ "< .001",
+      TRUE ~ sprintf("%.3f", p.value)
+    ),
+    Estimate = sprintf("%.2f", estimate),
+    SE = sprintf("%.2f", std.error),
+    t = sprintf("%.2f", statistic)
+  ) %>%
+  select(
+    Predictor = term,
+    Estimate,
+    SE,
+    t,
+    p
+  )
+
+kable(
+  reg_table,
+  format = "latex",
+  booktabs = TRUE,
+  caption = "Linear regression predicting change in beta central frequency\n from absolute SpO$_2$ and intervention.",
+  escape = FALSE,
+  align = c("l", "r", "r", "r", "r")
+) %>%
+  kable_styling(
+    latex_options = "hold_position",
+    font_size = 9,
+    position = "left"
+  )
+```
+
+
+
+
+
